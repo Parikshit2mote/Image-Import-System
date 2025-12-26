@@ -1,0 +1,161 @@
+{
+  "info": {
+    "name": "Image Import API",
+    "description": "API collection for Scalable Image Import System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
+          "path": ["health"]
+        },
+        "description": "Check API Gateway health status"
+      }
+    },
+    {
+      "name": "Import from Google Drive",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"folder_url\": \"https://drive.google.com/drive/folders/YOUR_FOLDER_ID\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/import/google-drive",
+          "host": ["{{base_url}}"],
+          "path": ["import", "google-drive"]
+        },
+        "description": "Import images from a Google Drive folder"
+      }
+    },
+    {
+      "name": "Import from Dropbox",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"folder_url\": \"https://www.dropbox.com/sh/YOUR_FOLDER_ID\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/import/dropbox",
+          "host": ["{{base_url}}"],
+          "path": ["import", "dropbox"]
+        },
+        "description": "Import images from a Dropbox folder (Bonus feature)"
+      }
+    },
+    {
+      "name": "Get All Images",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/images",
+          "host": ["{{base_url}}"],
+          "path": ["images"]
+        },
+        "description": "Get all imported images"
+      }
+    },
+    {
+      "name": "Get Images - Filtered by Source",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/images?source=google_drive",
+          "host": ["{{base_url}}"],
+          "path": ["images"],
+          "query": [
+            {
+              "key": "source",
+              "value": "google_drive"
+            }
+          ]
+        },
+        "description": "Get images filtered by source"
+      }
+    },
+    {
+      "name": "Get Images - Paginated",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/images?limit=50&offset=0",
+          "host": ["{{base_url}}"],
+          "path": ["images"],
+          "query": [
+            {
+              "key": "limit",
+              "value": "50"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            }
+          ]
+        },
+        "description": "Get images with pagination"
+      }
+    },
+    {
+      "name": "Get Images - Filtered and Paginated",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/images?source=dropbox&limit=20&offset=0",
+          "host": ["{{base_url}}"],
+          "path": ["images"],
+          "query": [
+            {
+              "key": "source",
+              "value": "dropbox"
+            },
+            {
+              "key": "limit",
+              "value": "20"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            }
+          ]
+        },
+        "description": "Get images with both filtering and pagination"
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    }
+  ]
+}
+
+
+
+
+
+

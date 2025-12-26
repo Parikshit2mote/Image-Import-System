@@ -1,0 +1,31 @@
+{
+  "name": "image-import-worker-service",
+  "version": "1.0.0",
+  "description": "Worker Service - Downloads images and uploads to S3",
+  "main": "worker.js",
+  "scripts": {
+    "start": "node worker.js",
+    "dev": "nodemon worker.js"
+  },
+  "dependencies": {
+    "redis": "^4.6.11",
+    "mysql2": "^3.6.5",
+    "aws-sdk": "^2.1499.0",
+    "minio": "^7.1.3",
+    "googleapis": "^126.0.1",
+    "axios": "^1.6.2",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+
+
+
+
+
+
