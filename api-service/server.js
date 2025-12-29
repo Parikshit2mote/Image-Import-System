@@ -28,12 +28,10 @@ app.get('/', (req, res) => {
 
 
 // Redis connection
-const REDIS_HOST = process.env.REDIS_HOST || 'redis';
-const REDIS_PORT = process.env.REDIS_PORT || 6379;
-const REDIS_DB = process.env.REDIS_DB || 0;
 const redisClient = redis.createClient({
-  url: `redis://${REDIS_HOST}:${REDIS_PORT}/${REDIS_DB}`
+  url: process.env.REDIS_URL
 });
+
 
 redisClient.on('error', (err) => {
   console.error('Redis Client Error', err);
