@@ -2,6 +2,11 @@
  * API Service - Node.js/Express
  * Receives HTTP requests and sends jobs to queue
  */
+const {
+  processGoogleDriveFolder,
+  processDropboxFolder
+} = require('./importHandlers');
+
 const express = require('express');
 const cors = require('cors');
 const redis = require('redis');
@@ -251,15 +256,15 @@ async function startQueueWorker() {
         0
       );
 
-      const jobData = JSON.parse(result.element);
-      console.log('Processing job:', jobData.job_id);
+      const job = JSON.parse(result.element);
+      console.log('Processing job:', job.job_id);
 
-      if (jobData.source === 'google_drive') {
-        await processGoogleDriveFolder(jobData);
+      if (job.source === 'google_drive') {
+        await processGoogleDriveFolder(job);
       }
 
-      if (jobData.source === 'dropbox') {
-        await processDropboxFolder(jobData);
+      if (job.source === 'dropbox') {
+        await processDropboxFolder(job);
       }
 
     } catch (err) {
@@ -269,8 +274,8 @@ async function startQueueWorker() {
   }
 }
 
-
 startQueueWorker();
+
 
 
 module.exports = app;
