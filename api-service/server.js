@@ -20,7 +20,6 @@ const { extractFolderId, extractDropboxFolderId } = require('./utils');
 const app = express();
 const PORT = process.env.PORT || 8000;
 
-
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -251,11 +250,9 @@ async function startQueueWorker() {
 
   while (true) {
     try {
-      const result = await redisClient.blPop(
-        'folder_import_queue',
-        0
-      );
-
+      const result = await redisClient.blPop(FOLDER_IMPORT_QUEUE, 0);
+      
+      if (!result || !result.element) continue;
       const job = JSON.parse(result.element);
       console.log('Processing job:', job.job_id);
 
