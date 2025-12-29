@@ -241,5 +241,37 @@ process.on('SIGTERM', async () => {
   process.exit(0);
 });
 
+async function startQueueWorker() {
+  console.log('Background worker started');
+
+  while (true) {
+    try {
+      const result = await redisClient.blPop(
+        'folder_import_queue',
+        0
+      );
+
+      const jobData = JSON.parse(result.element);
+      console.log('Processing job:', jobData.job_id);
+
+      if (jobData.source === 'google_drive') {
+        await processGoogleDriveFolder(jobData);
+      }
+
+      if (jobData.source === 'dropbox') {
+        await processDropboxFolder(jobData);
+      }
+
+    } catch (err) {
+      console.error('Worker error:', err);
+      await new Promise(r => setTimeout(r, 5000));
+    }
+  }
+}
+
+
+startQueueWorker();
+
+
 module.exports = app;
 

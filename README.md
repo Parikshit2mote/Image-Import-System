@@ -80,3 +80,13 @@ docker-compose.yml # All services
 ✅ MySQL for metadata  
 ✅ S3/MinIO for storage  
 
+## Deployment Note
+
+Due to Render free-tier limitations (background workers require paid plans),
+the import-service and worker-service are merged into the API service at runtime
+for demo purposes.
+
+The system remains logically multi-service and can be deployed as fully
+independent services on paid infrastructure or Kubernetes.
+
+
