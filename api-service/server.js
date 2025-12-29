@@ -14,6 +14,8 @@ const { extractFolderId, extractDropboxFolderId } = require('./utils');
 
 const app = express();
 const PORT = process.env.API_PORT || 8000;
+app.listen(PORT);
+
 
 // Middleware
 app.use(cors());
