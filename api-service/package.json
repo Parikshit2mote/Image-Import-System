@@ -15,7 +15,9 @@
     "redis": "^4.6.11",
     "uuid": "^9.0.1",
     "express-validator": "^7.0.1",
-    "pg": "^8.11.3"
+    "pg": "^8.11.3",
+    "minio": "^7.5.10",
+    "axios": "^1.6.2"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
