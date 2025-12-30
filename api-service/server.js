@@ -20,9 +20,13 @@ const { extractFolderId, extractDropboxFolderId } = require('./utils');
 const app = express();
 const PORT = process.env.PORT || 8000;
 
+const cors = require('cors');
+app.use(cors({
+  origin: '*' // For testing, or set frontend URL in production
+}));
 // Middleware
-app.use(cors());
 app.use(express.json());
+
 
 app.get('/', (req, res) => {
   res.json({
