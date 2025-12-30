@@ -1,33 +1,26 @@
 const { insertImageMetadata } = require('./database');
+const { uploadToS3, listGoogleDriveFiles } = require('./utils'); // your S3 + GDrive helpers
 
 async function processGoogleDriveFolder(job) {
   const { folder_id } = job;
 
   console.log('Importing Google Drive folder:', folder_id);
 
-  // ⚠️ TEMPORARY MOCK (to prove DB works)
-  // Later replace this with real Google Drive file list
-  const fakeFiles = [
-    {
-      name: 'test-image.jpg',
-      id: 'drive-file-id-123',
-      size: 123456,
-      mimeType: 'image/jpeg',
-      storagePath: 'https://fake-s3-url/test-image.jpg'
-    }
-  ];
+  // Get all files in the folder
+  const files = await listGoogleDriveFiles(folder_id);
 
-  for (const file of fakeFiles) {
+  for (const file of files) {
+    // Upload file to S3
+    const url = await uploadToS3(file);
+
+    // Save metadata to DB
     await insertImageMetadata({
-      name: file.name,
-      google_drive_id: file.id,
-      size: file.size,
-      mime_type: file.mimeType,
-      storage_path: file.storagePath,
-      source: 'google_drive'
+      url,
+      source: 'google_drive',
+      folder_id
     });
 
-    console.log('Saved metadata for:', file.name);
+    console.log('Saved metadata for', file.name);
   }
 
   console.log('Google Drive import done');
