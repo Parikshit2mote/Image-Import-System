@@ -1,19 +1,19 @@
 const { insertImageMetadata } = require('./database');
-const { uploadToS3, listGoogleDriveFiles } = require('./utils'); // your S3 + GDrive helpers
+const { listGoogleDriveFiles, uploadToS3 } = require('./utils');
 
 async function processGoogleDriveFolder(job) {
   const { folder_id } = job;
 
   console.log('Importing Google Drive folder:', folder_id);
 
-  // Get all files in the folder
-  const files = await listGoogleDriveFiles(folder_id);
+  // 1️⃣ Get files from Google Drive
+  const files = await listGoogleDriveFiles(folder_id); // implement this to return array of files
 
   for (const file of files) {
-    // Upload file to S3
-    const url = await uploadToS3(file);
+    // 2️⃣ Upload file to S3
+    const url = await uploadToS3(file); // returns the S3 URL
 
-    // Save metadata to DB
+    // 3️⃣ Save metadata to DB
     await insertImageMetadata({
       url,
       source: 'google_drive',
@@ -25,6 +25,7 @@ async function processGoogleDriveFolder(job) {
 
   console.log('Google Drive import done');
 }
+
 
 
 async function processDropboxFolder(job) {
