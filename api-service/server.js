@@ -20,7 +20,6 @@ const { extractFolderId, extractDropboxFolderId } = require('./utils');
 const app = express();
 const PORT = process.env.PORT || 8000;
 
-const cors = require('cors');
 app.use(cors({
   origin: '*' // For testing, or set frontend URL in production
 }));
@@ -35,10 +34,15 @@ app.get('/', (req, res) => {
 });
 
 
-// Redis connection
-const redisClient = redis.createClient({
-  url: process.env.REDIS_URL
-});
+// Redis connection - support both REDIS_URL and separate host/port (for Render compatibility)
+const redisClient = process.env.REDIS_URL 
+  ? redis.createClient({ url: process.env.REDIS_URL })
+  : redis.createClient({
+      socket: {
+        host: process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_PORT || '6379')
+      }
+    });
 
 
 redisClient.on('error', (err) => {
@@ -275,7 +279,16 @@ async function startQueueWorker() {
   }
 }
 
-startQueueWorker();
+// Only start queue worker if ENABLE_QUEUE_WORKER is set to 'true'
+// This allows the API service to run as a web service only (for Render free tier)
+if (process.env.ENABLE_QUEUE_WORKER === 'true') {
+  startQueueWorker().catch(err => {
+    console.error('Failed to start queue worker:', err);
+  });
+} else {
+  console.log('Queue worker disabled (ENABLE_QUEUE_WORKER not set to true)');
+  console.log('API service running in web-only mode (suitable for Render free tier)');
+}
 
 
 
