@@ -133,6 +133,18 @@ function App() {
     return date.toLocaleString();
   };
 
+  // Generate Google Drive thumbnail URL
+  const getImageThumbnail = (image) => {
+    if (image.google_drive_id) {
+      // Google Drive thumbnail (free, no API key needed for public files)
+      return `https://drive.google.com/thumbnail?id=${image.google_drive_id}&sz=w400`;
+    } else if (image.dropbox_id) {
+      // Dropbox thumbnail would go here if needed
+      return null;
+    }
+    return null;
+  };
+
   const handleFilterChange = (e) => {
     setFilter(e.target.value);
     setOffset(0);
@@ -205,29 +217,84 @@ function App() {
         ) : (
           <>
             <div className="images-grid">
-              {images.map((image) => (
-                <div key={image.id} className="image-card">
-                  <h3>{image.name}</h3>
-                  <div className="meta">
-                    <strong>Source:</strong> {image.source.replace('_', ' ').toUpperCase()}
+              {images.map((image) => {
+                const thumbnailUrl = getImageThumbnail(image);
+                return (
+                  <div key={image.id} className="image-card">
+                    {thumbnailUrl ? (
+                      <div className="image-preview">
+                        <a 
+                          href={image.storage_path || `https://drive.google.com/file/d/${image.google_drive_id}/view`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ width: '100%', height: '100%', display: 'block' }}
+                        >
+                          <img 
+                            src={thumbnailUrl} 
+                            alt={image.name}
+                            onError={(e) => {
+                              // Fallback if thumbnail fails
+                              e.target.style.display = 'none';
+                              e.target.parentElement.nextSibling.style.display = 'flex';
+                            }}
+                          />
+                        </a>
+                        <div className="image-placeholder" style={{ display: 'none' }}>
+                          <span>📷</span>
+                          <p>Preview unavailable</p>
+                          <a 
+                            href={image.storage_path || `https://drive.google.com/file/d/${image.google_drive_id}/view`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ color: '#667eea', marginTop: '10px', textDecoration: 'none' }}
+                          >
+                            View Image →
+                          </a>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="image-preview">
+                        <div className="image-placeholder">
+                          <span>📷</span>
+                          <p>No preview</p>
+                          {image.storage_path && (
+                            <a 
+                              href={image.storage_path}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ color: '#667eea', marginTop: '10px', textDecoration: 'none' }}
+                            >
+                              View Image →
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    <h3>{image.name}</h3>
+                    <div className="meta">
+                      <strong>Source:</strong> {image.source.replace('_', ' ').toUpperCase()}
+                    </div>
+                    <div className="meta">
+                      <strong>Size:</strong> {formatFileSize(image.size)}
+                    </div>
+                    <div className="meta">
+                      <strong>Type:</strong> {image.mime_type}
+                    </div>
+                    {image.storage_path && (
+                      <div className="meta">
+                        <a 
+                          href={image.storage_path} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          style={{ color: '#667eea', textDecoration: 'none' }}
+                        >
+                          View on Google Drive →
+                        </a>
+                      </div>
+                    )}
                   </div>
-                  <div className="meta">
-                    <strong>Size:</strong> {formatFileSize(image.size)}
-                  </div>
-                  <div className="meta">
-                    <strong>Type:</strong> {image.mime_type}
-                  </div>
-                  <div className="meta">
-                    <strong>ID:</strong> {image.google_drive_id || image.dropbox_id || 'N/A'}
-                  </div>
-                  <div className="meta">
-                    <strong>Imported:</strong> {formatDate(image.created_at)}
-                  </div>
-                  <div className="meta" style={{ fontSize: '0.8em', color: '#999', marginTop: '10px', wordBreak: 'break-all' }}>
-                    {image.storage_path}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {totalPages > 1 && (
