@@ -65,3 +65,4 @@ async function insertImageMetadata(data) {
 module.exports = { initDatabase, getImages, insertImageMetadata };
 
 
+
