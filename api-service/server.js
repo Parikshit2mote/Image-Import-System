@@ -44,23 +44,64 @@ const redisClient = process.env.REDIS_URL
       }
     });
 
+// Initialize Redis connection status
+let redisConnected = false;
 
 redisClient.on('error', (err) => {
   console.error('Redis Client Error', err);
+  redisConnected = false;
 });
 
 redisClient.on('connect', () => {
   console.log('Redis Client Connected');
+  redisConnected = true;
 });
 
-// Initialize Redis connection
+redisClient.on('ready', () => {
+  console.log('Redis Client Ready');
+  redisConnected = true;
+});
+
+redisClient.on('end', () => {
+  console.log('Redis Client Connection Ended');
+  redisConnected = false;
+});
+
+redisClient.on('reconnecting', () => {
+  console.log('Redis Client Reconnecting...');
+  redisConnected = false;
+});
 (async () => {
   try {
     await redisClient.connect();
+    redisConnected = true;
+    console.log('Redis connection established');
   } catch (error) {
     console.error('Failed to connect to Redis:', error);
+    redisConnected = false;
   }
 })();
+
+// Helper function to ensure Redis is connected
+async function ensureRedisConnected() {
+  if (!redisConnected) {
+    try {
+      await redisClient.connect();
+      redisConnected = true;
+      console.log('Redis connection established (retry)');
+    } catch (error) {
+      console.error('Failed to connect to Redis:', error);
+      throw new Error('Redis connection unavailable. Please check your Redis configuration.');
+    }
+  }
+  // Verify connection with ping
+  try {
+    await redisClient.ping();
+  } catch (error) {
+    redisConnected = false;
+    throw new Error('Redis connection lost. Please check your Redis configuration.');
+  }
+}
 
 const FOLDER_IMPORT_QUEUE = 'folder_import_queue';
 
@@ -98,6 +139,9 @@ app.post(
 
       // Generate job ID
       const jobId = uuidv4();
+
+      // Ensure Redis is connected before queueing
+      await ensureRedisConnected();
 
       // Send job to import-service queue (FIFO)
       const jobData = {
@@ -154,6 +198,9 @@ app.post(
 
       // Generate job ID
       const jobId = uuidv4();
+
+      // Ensure Redis is connected before queueing
+      await ensureRedisConnected();
 
       // Send job to import-service queue (FIFO)
       const jobData = {
