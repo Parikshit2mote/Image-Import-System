@@ -3,7 +3,28 @@ import axios from 'axios';
 import './index.css';
 
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
+// Use environment variable if set, otherwise use Render URL or localhost for dev
+const getApiBaseUrl = () => {
+  // If REACT_APP_API_BASE_URL is explicitly set, use it (full URL)
+  if (process.env.REACT_APP_API_BASE_URL) {
+    return process.env.REACT_APP_API_BASE_URL;
+  }
+  
+  // In production build (when served via nginx), use relative path to proxy
+  // The nginx config proxies /api/ to the Render API
+  if (process.env.NODE_ENV === 'production') {
+    return '/api';
+  }
+  
+  // For local development, use Render API URL (since API is deployed on Render)
+  // Change this to 'http://localhost:8000' if running API locally
+  return 'https://image-api-22tu.onrender.com';
+};
+
+const API_BASE_URL = getApiBaseUrl();
+
+// Debug log (remove in production if needed)
+console.log('API Base URL:', API_BASE_URL);
 
 function App() {
   const [folderUrl, setFolderUrl] = useState('');
