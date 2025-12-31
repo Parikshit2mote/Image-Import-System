@@ -11,7 +11,7 @@ Frontend (React UI):
 👉 https://image-frontend-19yu.onrender.com/
 
 Backend API (Express):
-👉 https://image-api-service.onrender.com/
+👉 https://image-api-22tu.onrender.com/
 
 ## Architecture Overview
 
