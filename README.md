@@ -5,6 +5,13 @@ A Dockerized, multi-service system for importing images from Google Drive, proce
 This project demonstrates microservice architecture, queue-based processing, and scalable background workers.
 
 ---
+🚀## Live Deployment (Working URLs)
+
+Frontend (React UI):
+👉 https://image-frontend-19yu.onrender.com/
+
+Backend API (Express):
+👉 https://image-api-service.onrender.com/
 
 ## Architecture Overview
 
