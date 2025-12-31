@@ -140,24 +140,47 @@ app.post(
       // Generate job ID
       const jobId = uuidv4();
 
-      // Ensure Redis is connected before queueing
-      await ensureRedisConnected();
+      // Check if queue worker is enabled
+      const useQueue = process.env.ENABLE_QUEUE_WORKER === 'true';
+      
+      if (useQueue) {
+        // Use queue-based processing (requires background workers)
+        await ensureRedisConnected();
 
-      // Send job to import-service queue (FIFO)
-      const jobData = {
-        job_id: jobId,
-        folder_id: folderId,
-        folder_url: folder_url,
-        source: 'google_drive'
-      };
+        const jobData = {
+          job_id: jobId,
+          folder_id: folderId,
+          folder_url: folder_url,
+          source: 'google_drive'
+        };
 
-      await redisClient.rPush(FOLDER_IMPORT_QUEUE, JSON.stringify(jobData));
+        await redisClient.rPush(FOLDER_IMPORT_QUEUE, JSON.stringify(jobData));
 
-      return res.status(200).json({
-        job_id: jobId,
-        status: 'queued',
-        folder_url: folder_url
-      });
+        return res.status(200).json({
+          job_id: jobId,
+          status: 'queued',
+          folder_url: folder_url
+        });
+      } else {
+        // Process synchronously (for Render free tier)
+        const { processGoogleDriveFolder } = require('./folderProcessor');
+        
+        // Process in background (don't block response)
+        processGoogleDriveFolder(folderId, folder_url)
+          .then(result => {
+            console.log(`Import completed for job ${jobId}:`, result);
+          })
+          .catch(error => {
+            console.error(`Import failed for job ${jobId}:`, error);
+          });
+
+        return res.status(200).json({
+          job_id: jobId,
+          status: 'processing',
+          folder_url: folder_url,
+          message: 'Import started. Images will be processed in the background.'
+        });
+      }
     } catch (error) {
       console.error('Error in /import/google-drive:', error);
       return res.status(500).json({
@@ -274,12 +297,24 @@ app.get(
  */
 app.get('/health', async (req, res) => {
   try {
-    // Check Redis connection
-    await redisClient.ping();
-    return res.status(200).json({
+    const health = {
       status: 'healthy',
-      service: 'api-service'
-    });
+      service: 'api-service',
+      queue_worker_enabled: process.env.ENABLE_QUEUE_WORKER === 'true'
+    };
+    
+    // Check Redis connection (optional - only if queue worker is enabled)
+    if (process.env.ENABLE_QUEUE_WORKER === 'true') {
+      try {
+        await redisClient.ping();
+        health.redis = 'connected';
+      } catch (error) {
+        health.redis = 'disconnected';
+        health.warning = 'Redis not available but queue worker is enabled';
+      }
+    }
+    
+    return res.status(200).json(health);
   } catch (error) {
     return res.status(503).json({
       status: 'unhealthy',
